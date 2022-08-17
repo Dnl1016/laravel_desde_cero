@@ -29,6 +29,6 @@ class Order extends Model
 
     public function products()
     {
-        return $this-> morphToMany(Product:: class, 'productable')->withPivot('quantity');
+        return $this->morphToMany(Product:: class, 'productable')->withPivot('quantity');
     }
 }

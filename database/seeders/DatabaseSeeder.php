@@ -45,25 +45,25 @@ class DatabaseSeeder extends Seeder
         });
 
 
-    $carts = Cart::factory(20)->create();
+        $carts = Cart::factory(20)->create();
 
-    $products = Product::factory(50)
-        ->create()
-        ->each(function ($product) use ($orders, $carts) {
-            $order = $orders->random();
+        $products = Product::factory(50)
+            ->create()
+            ->each(function ($product) use ($orders, $carts) {
+                $order = $orders->random();
 
-            $order->products()->attach([
-                $product->id => ['quantity' => mt_rand(1, 3)]
-            ]);
+                $order->products()->attach([
+                    $product->id => ['quantity' => mt_rand(1, 3)]
+                ]);
 
-            $cart = $carts->random();
+                $cart = $carts->random();
 
-            $cart->products()->attach([
-                $product->id => ['quantity' => mt_rand(1, 3)]
-            ]);
+                $cart->products()->attach([
+                    $product->id => ['quantity' => mt_rand(1, 3)]
+                ]);
 
-            $images = Image::factory(mt_rand(2, 4))->make();
-            $product->images()->saveMany($images);
-        });
+                $images = Image::factory(mt_rand(2, 4))->make();
+                $product->images()->saveMany($images);
+            });
     }
 }
