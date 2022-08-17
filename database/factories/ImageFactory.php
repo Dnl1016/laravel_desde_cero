@@ -4,7 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Product;
 use App\Models\User;
-use App\Image;
+use App\Models\Image;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ImageFactory extends Factory
