@@ -29,7 +29,7 @@
             >
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="btn btn-warning">Remove From Cart</button>
+                <button type="submit" class="btn btn-warning">Remover</button>
             </form>
         @else
             <form
@@ -38,7 +38,7 @@
                 action="{{ route('products.carts.store', ['product' => $product->id]) }}"
             >
                 @csrf
-                <button type="submit" class="btn btn-success">Add To Cart</button>
+                <button type="submit" class="btn btn-success">Agregar al Cart</button>
             </form>
         @endif
     </div>

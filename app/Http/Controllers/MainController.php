@@ -8,11 +8,12 @@ use Illuminate\Http\Request;
 
 class MainController extends Controller
 {
-    public function index(){
-        $products= Product::available()->get();
+    public function index()
+    {
+        $products = Product::available()->get();
 
         return view('welcome')->with([
-            'products'=>$products,
+            'products' => $products,
         ]);
     }
 }
