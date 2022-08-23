@@ -21,7 +21,7 @@
         <p class="card-text">{{ $product->description }}</p>
         <p class="card-text"><strong>{{ $product->stock }} left</strong></p>
         @if (isset($cart))
-            <p class="card-text">{{ $product->pivot->quantity }} in your cart <strong>(${{ $product->total }})</strong></p>
+            <p class="card-text">{{ $product->pivot->quantity }} en tu carro <strong>(${{ $product->total }})</strong></p>
             <form
                 class="d-inline"
                 method="POST"
@@ -29,7 +29,7 @@
             >
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="btn btn-warning">Remover</button>
+                <button type="submit" class="btn btn-warning">Remove From Cart</button>
             </form>
         @else
             <form
@@ -38,7 +38,7 @@
                 action="{{ route('products.carts.store', ['product' => $product->id]) }}"
             >
                 @csrf
-                <button type="submit" class="btn btn-success">Agregar al Cart</button>
+                <button type="submit" class="btn btn-success">Add To Cart</button>
             </form>
         @endif
     </div>

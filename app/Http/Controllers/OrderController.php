@@ -2,20 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
-use App\Http\Requests\StoreOrderRequest;
-use App\Http\Requests\UpdateOrderRequest;
+use App\Services\CartService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    public $cartService;
+
+    public function __construct(CartService $cartService)
     {
-        //
+        $this->cartService = $cartService;
+
+        $this->middleware('auth');
     }
 
     /**
@@ -25,62 +25,57 @@ class OrderController extends Controller
      */
     public function create()
     {
-        //
+        $cart = $this->cartService->getFromCookie();
+
+        if (!isset($cart) || $cart->products->isEmpty()) {
+            return redirect()
+                ->back()
+                ->withErrors("Tu carrito esta vacio!");
+        }
+
+        return view('orders.create')->with([
+            'cart' => $cart,
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\StoreOrderRequest  $request
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreOrderRequest $request)
+    public function store(Request $request)
     {
-        //
-    }
+        return DB::transaction(function() use($request) {
+            $user = $request->user();
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Order $order)
-    {
-        //
-    }
+            $order = $user->orders()->create([
+                'status' => 'pending',
+            ]);
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Order $order)
-    {
-        //
-    }
+            $cart = $this->cartService->getFromCookie();
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \App\Http\Requests\UpdateOrderRequest  $request
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Http\Response
-     */
-    public function update(UpdateOrderRequest $request, Order $order)
-    {
-        //
-    }
+            $cartProductsWithQuantity = $cart
+                ->products
+                ->mapWithKeys(function ($product) {
+                    $quantity = $product->pivot->quantity;
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Order $order)
-    {
-        //
+                    if ($product->stock < $quantity) {
+                        throw ValidationException::withMessages([
+                            'product' => "There is not enough stock for the quantity you required of {$product->title}",
+                        ]);
+                    }
+
+                    $product->decrement('stock', $quantity);
+                    $element[$product->id] = ['quantity' => $quantity];
+
+                    return $element;
+                });
+
+            $order->products()->attach($cartProductsWithQuantity->toArray());
+
+            return redirect()->route('orders.payments.create', ['order' => $order]);
+        }, 5);
     }
 }
+
